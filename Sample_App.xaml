@@ -1,0 +1,840 @@
+<Application x:Class="RenishawOnDemand.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:domain="clr-namespace:Model;assembly=Model"
+             xmlns:vm="clr-namespace:RenishawOnDemand.ViewModel"
+             xmlns:view="clr-namespace:RenishawOnDemand.View"
+             xmlns:resourceFiles="clr-namespace:ResourceFiles;assembly=ResourceFiles"
+             xmlns:finance="clr-namespace:RenishawOnDemand.View.Finance"
+             xmlns:finance1="clr-namespace:RenishawOnDemand.ViewModel.Finance">
+
+    <Application.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/Renishaw.UI.WPFStyles;component/Templates.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+            <!-- Login Screen styles -->
+            <Style TargetType="TextBlock" x:Key="LoginTextBlockStyle">
+                <Setter Property="Foreground" Value="{DynamicResource UI.DarkForegroundBrush}" />
+                <Setter Property="FontSize" Value="12" />
+            </Style>
+            <Style TargetType="TextBlock" x:Key="HoverUnderlineStyle">
+                <Style.Triggers>
+                    <Trigger Property="IsMouseOver" Value="True">
+                        <Setter Property="TextBlock.TextDecorations" Value="Underline" />
+                    </Trigger>
+                </Style.Triggers>
+            </Style>
+            <!--PreviewScreen Navigation border styles -->
+            <Style x:Key="BorderArrowButtonStyle" TargetType="Border">
+                <Style.Triggers>
+                    <DataTrigger
+                        Binding="{Binding RelativeSource={RelativeSource Mode=FindAncestor,AncestorType={x:Type Viewbox}},
+                                               Path=IsMouseOver}"
+                        Value="True">
+                        <Setter Property="Visibility" Value="Visible" />
+                    </DataTrigger>
+                    <DataTrigger
+                        Binding="{Binding RelativeSource={RelativeSource Mode=FindAncestor,AncestorType={x:Type Viewbox}},
+                                               Path=IsMouseOver}"
+                        Value="False">
+                        <Setter Property="Visibility" Value="Hidden" />
+                    </DataTrigger>
+                </Style.Triggers>
+            </Style>
+
+            <domain:StringToIconConverter x:Key="StringToIconConverter" />
+            <domain:MediaStateToIconConverter x:Key="MediaStateToIconConverter" />
+            <domain:FileExtensionToIconUrlConverter x:Key="FileExtensionToIconUrlConverter" />
+
+            <!--Finance ListView ItemContainer Style-->
+            <Style x:Key="FinanceListViewItemContainerStyle" TargetType="ListViewItem">
+                <Setter Property="Background" Value="Transparent" />
+            </Style>
+
+            <!--GridViewColumnHeader-->
+            <Style x:Key="GridViewColumnHeaderStyle" TargetType="GridViewColumnHeader"
+                   BasedOn="{StaticResource {x:Type GridViewColumnHeader}}">
+                <Setter Property="Background" Value="Transparent" />
+            </Style>
+
+            <!--Text block-->
+            <Style x:Key="TextBlockStyle" TargetType="TextBlock" BasedOn="{StaticResource {x:Type TextBlock}}">
+                <Setter Property="Background" Value="Transparent" />
+            </Style>
+
+            <!--Application Text block-->
+            <Style x:Key="ApplicationTextBlockStyle" TargetType="TextBlock"
+                   BasedOn="{StaticResource {x:Type TextBlock}}">
+                <Setter Property="Background" Value="Transparent" />
+                <Setter Property="FontSize" Value="14" />
+                <Setter Property="FontWeight" Value="DemiBold" />
+            </Style>
+
+            <!--Title text block-->
+            <Style x:Key="TextBlockTitleStyle" TargetType="TextBlock">
+                <Setter Property="FontSize" Value="18" />
+                <Setter Property="VerticalAlignment" Value="Center" />
+                <Setter Property="HorizontalAlignment" Value="Left" />
+                <Setter Property="FontWeight" Value="DemiBold" />
+                <Setter Property="Background" Value="Transparent" />
+            </Style>
+
+            <!--Ordinary text box-->
+            <Style x:Key="TextBoxStyle" TargetType="TextBox" BasedOn="{StaticResource {x:Type TextBox}}">
+                <Setter Property="FontSize" Value="16" />
+                <Setter Property="HorizontalAlignment" Value="Left" />
+                <Setter Property="FontWeight" Value="DemiBold" />
+                <Setter Property="Background" Value="Transparent" />
+                <Setter Property="BorderThickness" Value="0" />
+                <Setter Property="VerticalAlignment" Value="Center" />
+                <Setter Property="Width" Value="Auto" />
+            </Style>
+
+            <Style x:Key="SettingsStackPanelStyle" TargetType="StackPanel">
+                <Setter Property="HorizontalAlignment" Value="Center" />
+                <Setter Property="VerticalAlignment" Value="Center" />
+                <Setter Property="Orientation" Value="Horizontal" />
+            </Style>
+
+            <!--Settings text block-->
+            <Style x:Key="SettingsTextblockStyle" TargetType="TextBlock" BasedOn="{StaticResource {x:Type TextBlock}}">
+                <Setter Property="FontSize" Value="13" />
+                <Setter Property="HorizontalAlignment" Value="Left" />
+                <Setter Property="FontWeight" Value="DemiBold" />
+                <Setter Property="Background" Value="Transparent" />
+                <Setter Property="VerticalAlignment" Value="Center" />
+                <Setter Property="Width" Value="Auto" />
+            </Style>
+
+            <!--Settings check box-->
+            <Style x:Key="SettingsCheckboxStyle" TargetType="CheckBox" BasedOn="{StaticResource {x:Type CheckBox}}">
+                <Setter Property="HorizontalAlignment" Value="Center" />
+                <Setter Property="VerticalAlignment" Value="Center" />
+                <Setter Property="Background" Value="Transparent" />
+                <Setter Property="Width" Value="20" />
+                <Setter Property="Height" Value="20" />
+                <Setter Property="VerticalContentAlignment" Value="Center" />
+            </Style>
+
+            <!--Finance text box read only-->
+            <Style x:Key="FinanceTextBoxStyleReadonly" TargetType="TextBox" BasedOn="{StaticResource {x:Type TextBox}}">
+                <Setter Property="Height" Value="30" />
+                <Setter Property="VerticalContentAlignment" Value="Center" />
+                <Setter Property="IsReadOnly" Value="True" />
+                <Setter Property="BorderThickness" Value="0 0 0 2" />
+                <Setter Property="BorderBrush" Value="Black" />
+                <Setter Property="VerticalAlignment" Value="Center" />
+                <Setter Property="Width" Value="Auto" />
+            </Style>
+
+            <!--Finance text box-->
+            <Style x:Key="FinanceTextBoxStyle" TargetType="TextBox" BasedOn="{StaticResource {x:Type TextBox}}">
+                <Setter Property="Height" Value="30" />
+                <Setter Property="VerticalContentAlignment" Value="Center" />
+                <Setter Property="IsReadOnly" Value="False" />
+                <Setter Property="BorderThickness" Value="0 0 0 2" />
+                <Setter Property="BorderBrush" Value="Black" />
+                <Setter Property="VerticalAlignment" Value="Center" />
+                <Setter Property="Width" Value="Auto" />
+            </Style>
+
+            <!--Login text box-->
+            <Style x:Key="LoginTextBoxStyle" TargetType="TextBox" BasedOn="{StaticResource {x:Type TextBox}}">
+                <Setter Property="FontSize" Value="18" />
+                <Setter Property="FontWeight" Value="DemiBold" />
+                <Setter Property="VerticalAlignment" Value="Center" />
+                <Setter Property="VerticalContentAlignment" Value="Center" />
+                <Setter Property="HorizontalContentAlignment" Value="Left" />
+                <Setter Property="Width" Value="520" />
+                <Setter Property="Height" Value="50" />
+            </Style>
+
+            <!--Password text box-->
+            <Style x:Key="PasswordTextBoxStyle" TargetType="PasswordBox"
+                   BasedOn="{StaticResource {x:Type PasswordBox}}">
+                <Setter Property="FontSize" Value="14" />
+                <Setter Property="FontWeight" Value="Normal" />
+                <Setter Property="VerticalAlignment" Value="Center" />
+                <Setter Property="VerticalContentAlignment" Value="Center" />
+                <Setter Property="HorizontalContentAlignment" Value="Left" />
+                <Setter Property="Width" Value="520" />
+                <Setter Property="Height" Value="50" />
+            </Style>
+
+            <!--Items control-->
+            <Style x:Key="ItemsControlStyle" TargetType="ItemsControl" BasedOn="{StaticResource {x:Type ItemsControl}}">
+                <Setter Property="Margin" Value="10,0,0,0" />
+            </Style>
+
+            <!--Checkbox -->
+            <Style x:Key="CheckBoxStyle" TargetType="CheckBox">
+                <Setter Property="FontSize" Value="13" />
+                <Setter Property="HorizontalAlignment" Value="Left" />
+                <Setter Property="FontWeight" Value="Medium" />
+                <Setter Property="Background" Value="Transparent" />
+                <Setter Property="VerticalAlignment" Value="Center" />
+                <Setter Property="Width" Value="Auto" />
+                <Setter Property="Margin" Value="20,10,0,0" />
+            </Style>
+
+            <!--Border -->
+            <Style x:Key="BorderStyle" TargetType="Border">
+                <Setter Property="CornerRadius" Value="0" />
+                <Setter Property="Background" Value="Transparent" />
+                <Setter Property="BorderBrush" Value="Aqua" />
+                <Setter Property="BorderThickness" Value="1" />
+            </Style>
+
+            <!--Large Label -->
+            <Style x:Key="LargeLabelStyle" TargetType="Label" BasedOn="{StaticResource {x:Type Label}}">
+                <Setter Property="FontSize" Value="18" />
+                <Setter Property="FontWeight" Value="DemiBold" />
+                <Setter Property="VerticalAlignment" Value="Center" />
+                <Setter Property="VerticalContentAlignment" Value="Center" />
+            </Style>
+
+            <!--Small Label -->
+            <Style x:Key="SmallLabelStyle" TargetType="Label" BasedOn="{StaticResource {x:Type Label}}">
+                <Setter Property="FontSize" Value="11" />
+                <Setter Property="FontWeight" Value="DemiBold" />
+            </Style>
+
+            <!--Medium Label -->
+            <Style x:Key="MediumLabelStyle" TargetType="Label" BasedOn="{StaticResource {x:Type Label}}">
+                <Setter Property="FontSize" Value="16" />
+                <Setter Property="VerticalAlignment" Value="Center" />
+                <Setter Property="VerticalContentAlignment" Value="Center" />
+                <Setter Property="FontWeight" Value="DemiBold" />
+            </Style>
+
+            <!--Login Label -->
+            <Style x:Key="LoginLabelStyle" TargetType="Label" BasedOn="{StaticResource {x:Type Label}}">
+                <Setter Property="Height" Value="50" />
+                <Setter Property="Width" Value="520" />
+                <Setter Property="FontSize" Value="17" />
+                <Setter Property="FontWeight" Value="Bold" />
+                <Setter Property="Background" Value="Transparent" />
+                <Setter Property="VerticalContentAlignment" Value="Center" />
+                <Setter Property="HorizontalContentAlignment" Value="Left" />
+            </Style>
+
+            <!--Finance Label -->
+            <Style x:Key="FinanceLabelStyle" TargetType="Label">
+                <Setter Property="VerticalAlignment" Value="Center" />
+                <Setter Property="VerticalContentAlignment" Value="Center" />
+                <Setter Property="HorizontalAlignment" Value="Right" />
+                <Setter Property="FontSize" Value="14" />
+                <Setter Property="FontWeight" Value="SemiBold" />
+                <Setter Property="Foreground" Value="White" />
+            </Style>
+
+            <!--Finance Label Italic -->
+            <Style x:Key="FinanceLabelStyleItalic" TargetType="Label">
+                <Setter Property="VerticalAlignment" Value="Center" />
+                <Setter Property="VerticalContentAlignment" Value="Center" />
+                <Setter Property="HorizontalAlignment" Value="Left" />
+                <Setter Property="FontSize" Value="14" />
+                <Setter Property="FontWeight" Value="SemiBold" />
+                <Setter Property="FontStyle" Value="Italic" />
+                <Setter Property="Foreground" Value="LightGray" />
+            </Style>
+
+            <!--Hire Purchase Input Label -->
+            <Style x:Key="HirePurchaseInputLabelStyle" TargetType="Label">
+                <Setter Property="HorizontalAlignment" Value="Right" />
+                <Setter Property="FontSize" Value="14" />
+            </Style>
+
+            <!--Hire Purchase TextBox  -->
+            <Style x:Key="HirePurchaseTextBoxStyle" TargetType="TextBox">
+                <Setter Property="VerticalContentAlignment" Value="Center" />
+                <Setter Property="VerticalAlignment" Value="Center" />
+                <Setter Property="BorderThickness" Value="0 0 0 2" />
+                <Setter Property="BorderBrush" Value="Black" />
+                <Setter Property="Height" Value="35" />
+            </Style>
+
+            <!--Date picker style-->
+            <Style x:Key="DatePickerStyle" TargetType="DatePicker">
+                <Setter Property="FontSize" Value="12" />
+                <Setter Property="FontWeight" Value="Demibold" />
+            </Style>
+
+            <!--Search Filter Label -->
+            <Style x:Key="SearchFilterLabelStyle" TargetType="Label">
+                <Setter Property="FontSize" Value="14" />
+                <Setter Property="FontWeight" Value="DemiBold" />
+                <Setter Property="VerticalContentAlignment" Value="Center" />
+                <Setter Property="HorizontalContentAlignment" Value="Left" />
+                <Setter Property="Width" Value="400" />
+                <Setter Property="Height" Value="50" />
+            </Style>
+
+            <!--Combobox Item -->
+            <Style x:Key="ComboboxItemStyle" TargetType="ComboBoxItem">
+                <Setter Property="FontSize" Value="16" />
+                <Setter Property="FontWeight" Value="DemiBold" />
+                <Setter Property="Background" Value="Transparent" />
+            </Style>
+
+            <!--Progress text box-->
+            <Style x:Key="ProgressTextBoxStyle" TargetType="TextBox">
+                <Setter Property="FontSize" Value="11" />
+                <Setter Property="HorizontalAlignment" Value="Left" />
+                <Setter Property="FontWeight" Value="Normal" />
+                <Setter Property="Background" Value="Transparent" />
+                <Setter Property="BorderThickness" Value="0" />
+                <Setter Property="VerticalAlignment" Value="Center" />
+                <Setter Property="Width" Value="Auto" />
+                <Setter Property="Visibility" Value="Visible" />
+            </Style>
+
+            <!--Progress text block-->
+            <Style x:Key="ProgressTextBlockStyle" TargetType="TextBlock">
+                <Setter Property="FontSize" Value="11" />
+                <Setter Property="HorizontalAlignment" Value="Left" />
+                <Setter Property="FontWeight" Value="Normal" />
+                <Setter Property="Background" Value="Transparent" />
+                <Setter Property="VerticalAlignment" Value="Center" />
+                <Setter Property="Width" Value="Auto" />
+                <Setter Property="Visibility" Value="Visible" />
+            </Style>
+
+            <!--Radio Button style-->
+            <Style x:Key="RadioButtonStyle" TargetType="RadioButton" BasedOn="{StaticResource {x:Type RadioButton}}">
+                <Setter Property="FontWeight" Value="Normal" />
+                <Setter Property="Height" Value="Auto" />
+                <Setter Property="Margin" Value="0,0,0,6" />
+                <Setter Property="Width" Value="400" />
+                <Setter Property="FontSize" Value="14" />
+                <Setter Property="HorizontalAlignment" Value="Left" />
+                <Setter Property="HorizontalContentAlignment" Value="Left" />
+            </Style>
+
+            <!--Tab Item style-->
+            <Style x:Key="TabItemStyle" TargetType="TabItem" BasedOn="{StaticResource {x:Type TabItem}}">
+                <Setter Property="FontWeight" Value="DemiBold" />
+                <Setter Property="FontSize" Value="13" />
+            </Style>
+
+            <!--Button style-->
+            <Style x:Key="ButtonStyle" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+                <Setter Property="FontWeight" Value="Normal" />
+                <Setter Property="Height" Value="30" />
+                <Setter Property="Width" Value="Auto" />
+                <Setter Property="FontSize" Value="16" />
+                <Setter Property="HorizontalAlignment" Value="Center" />
+                <Setter Property="VerticalContentAlignment" Value="Center" />
+                <Setter Property="VerticalAlignment" Value="Center" />
+                <Setter Property="HorizontalContentAlignment" Value="Center" />
+            </Style>
+
+            <!--Home view Button style-->
+            <Style x:Key="HomeViewButtonStyle" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+                <Setter Property="FontWeight" Value="DemiBold" />
+                <Setter Property="Height" Value="220" />
+                <Setter Property="Width" Value="220" />
+                <Setter Property="FontSize" Value="16" />
+                <Setter Property="Margin" Value="5" />
+            </Style>
+
+            <!--Application List Button style-->
+            <Style x:Key="ApplicationButtonStyle" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+                <Setter Property="FontWeight" Value="DemiBold" />
+                <Setter Property="Height" Value="30" />
+                <Setter Property="Width" Value="Auto" />
+                <Setter Property="Padding" Value="5,0,5,0" />
+                <Setter Property="FontSize" Value="14" />
+            </Style>
+
+            <!--Expander style-->
+            <Style x:Key="ExpanderStyle" TargetType="Expander" BasedOn="{StaticResource {x:Type Expander}}">
+                <Setter Property="FontWeight" Value="DemiBold" />
+                <Setter Property="FontSize" Value="16" />
+            </Style>
+
+            <!--Flat Button style-->
+            <Style x:Key="ButtonStyleFlat" TargetType="Button"
+                   BasedOn="{StaticResource {x:Static ToolBar.ButtonStyleKey}}">
+                <Setter Property="Height" Value="40" />
+                <Setter Property="Width" Value="50" />
+                <Setter Property="FontSize" Value="16" />
+                <Setter Property="HorizontalAlignment" Value="Center" />
+                <Setter Property="VerticalContentAlignment" Value="Center" />
+                <Setter Property="VerticalAlignment" Value="Center" />
+                <Setter Property="HorizontalContentAlignment" Value="Center" />
+            </Style>
+
+            <!--Flat Button style no highlighting-->
+            <Style x:Key="ButtonStyleFlatNoHighlight" TargetType="Button"
+                   BasedOn="{StaticResource {x:Static ToolBar.ButtonStyleKey}}">
+                <Setter Property="Height" Value="40" />
+                <Setter Property="Width" Value="50" />
+                <Setter Property="FontSize" Value="16" />
+                <Setter Property="HorizontalAlignment" Value="Center" />
+                <Setter Property="VerticalContentAlignment" Value="Center" />
+                <Setter Property="VerticalAlignment" Value="Center" />
+                <Setter Property="HorizontalContentAlignment" Value="Center" />
+
+                <Setter Property="Background" Value="Transparent" />
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="{x:Type Button}">
+                            <ContentPresenter />
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+            <Style x:Key="MediaButtonFlat" TargetType="{x:Type Button}" BasedOn="{StaticResource ButtonStyleFlat}">
+                <Setter Property="Background" Value="Transparent" />
+                <Setter Property="Width" Value="30" />
+                <Setter Property="Height" Value="30" />
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="{x:Type Button}">
+                            <Grid Background="{TemplateBinding Background}">
+                                <ContentPresenter />
+                            </Grid>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+            <!--Rectangle style-->
+            <Style x:Key="RectangleStyle" TargetType="Rectangle">
+                <Setter Property="Fill" Value="{DynamicResource UI.RenishawLogo}" />
+            </Style>
+
+            <!--Progress percentage text block-->
+            <Style x:Key="ProgressPercentageTextBoxStyle" TargetType="TextBox">
+                <Setter Property="FontSize" Value="16" />
+                <Setter Property="HorizontalAlignment" Value="Left" />
+                <Setter Property="VerticalAlignment" Value="Center" />
+                <Setter Property="FontWeight" Value="DemiBold" />
+                <Setter Property="Background" Value="Transparent" />
+                <Setter Property="BorderThickness" Value="0" />
+                <Setter Property="Width" Value="Auto" />
+                <Setter Property="Visibility" Value="Visible" />
+            </Style>
+
+            <!--Progress bar style-->
+            <Style x:Key="ProgressBarStyle" TargetType="ProgressBar">
+                <Setter Property="VerticalAlignment" Value="Center" />
+                <Setter Property="HorizontalAlignment" Value="Left" />
+                <Setter Property="Height" Value="25" />
+                <Setter Property="Width" Value="170" />
+                <Setter Property="Minimum" Value="0" />
+                <Setter Property="Maximum" Value="100" />
+            </Style>
+
+            <!--Tab item text-->
+            <Style x:Key="TabHeaderTextStyle" TargetType="TabItem">
+                <Setter Property="FontSize" Value="16" />
+                <Setter Property="HorizontalAlignment" Value="Center" />
+                <Setter Property="VerticalAlignment" Value="Center" />
+                <Setter Property="FontWeight" Value="DemiBold" />
+                <Setter Property="Background" Value="Transparent" />
+            </Style>
+
+            <!--Button header text-->
+            <Style x:Key="ButtonTextStyle" TargetType="Button">
+                <Setter Property="FontSize" Value="16" />
+                <Setter Property="HorizontalAlignment" Value="Center" />
+                <Setter Property="VerticalAlignment" Value="Center" />
+                <Setter Property="FontWeight" Value="DemiBold" />
+                <Setter Property="Background" Value="Transparent" />
+            </Style>
+            <Style x:Key="CloseButtonTextStyle" TargetType="{x:Type Button}">
+                <Setter Property="HorizontalAlignment" Value="Right" />
+                <Setter Property="VerticalAlignment" Value="Top" />
+                <Setter Property="Height" Value="22" />
+                <Setter Property="Width" Value="40" />
+                <Setter Property="Foreground" Value="White" />
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="Button">
+                            <Border>
+                                <Border.Style>
+                                    <Style TargetType="{x:Type Border}">
+                                        <Style.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter Property="Background" Value="#C12000" />
+                                            </Trigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Border.Style>
+                                <Grid Background="Transparent">
+                                    <ContentPresenter />
+                                </Grid>
+                            </Border>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+            <!--List view Item styles-->
+            <!--List view Item -->
+            <Style x:Key="ListViewItemStyle" TargetType="ListViewItem">
+                <Setter Property="FontSize" Value="14" />
+                <Setter Property="FontWeight" Value="DemiBold" />
+                <Setter Property="Margin" Value="0,10,0,10" />
+                <Setter Property="BorderThickness" Value="0" />
+            </Style>
+
+            <Style x:Key="SearchResultListViewItemStyle" TargetType="ListViewItem">
+                <Setter Property="VerticalContentAlignment" Value="Center" />
+                <Setter Property="BorderThickness" Value="1" />
+                <Setter Property="BorderBrush" Value="Aqua" />
+            </Style>
+
+            <!-- Benefits calculator styles -->
+            <Style x:Key="BenefitsCalculatorLabelStyle" TargetType="Label">
+                <Setter Property="VerticalContentAlignment" Value="Top" />
+                <Setter Property="VerticalAlignment" Value="Top" />
+                <Setter Property="FontWeight" Value="DemiBold" />
+            </Style>
+
+            <Style x:Key="BenefitsCalculatorComboBoxStyle" TargetType="ComboBox">
+                <Setter Property="VerticalContentAlignment" Value="Center" />
+                <Setter Property="VerticalAlignment" Value="Top" />
+                <Setter Property="Height" Value="30" />
+            </Style>
+
+            <Style x:Key="BenefitsCalculatorTextBoxStyle" TargetType="TextBox">
+                <Setter Property="VerticalContentAlignment" Value="Center" />
+                <Setter Property="VerticalAlignment" Value="Top" />
+                <Setter Property="Height" Value="30" />
+            </Style>
+
+            <Style x:Key="ColumnHeaderTextStyle" TargetType="DataGridColumnHeader">
+                <Setter Property="VerticalContentAlignment" Value="Center" />
+                <Setter Property="VerticalAlignment" Value="Center" />
+                <Setter Property="Background" Value="Transparent" />
+                <Setter Property="FontSize" Value="16" />
+                <Setter Property="FontWeight" Value="SemiBold" />
+                <Setter Property="Foreground" Value="White" />
+                <Setter Property="Margin" Value="10,0,10,0" />
+                <Setter Property="ContentTemplate">
+                    <Setter.Value>
+                        <DataTemplate>
+                            <TextBlock TextWrapping="Wrap" Text="{Binding}" />
+                        </DataTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+            <Style x:Key="DataGridColumnHeaderStyle" TargetType="{x:Type DataGridRow}">
+                <Setter Property="VerticalContentAlignment" Value="Center" />
+                <Setter Property="FontWeight" Value="Normal" />
+            </Style>
+            <!-- TabControl Styles -->
+            <Style x:Key="TabControlStyle1" TargetType="{x:Type TabControl}">
+                <Setter Property="Padding" Value="0" />
+                <Setter Property="HorizontalContentAlignment" Value="Center" />
+                <Setter Property="VerticalContentAlignment" Value="Center" />
+                <Setter Property="BorderThickness" Value="0" />
+                <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}" />
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="{x:Type TabControl}">
+                            <Grid x:Name="templateRoot" ClipToBounds="true" SnapsToDevicePixels="true"
+                                  KeyboardNavigation.TabNavigation="Local">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition x:Name="ColumnDefinition0" />
+                                    <ColumnDefinition x:Name="ColumnDefinition1" Width="0" />
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition x:Name="RowDefinition0" Height="Auto" />
+                                    <RowDefinition x:Name="RowDefinition1" Height="*" />
+                                </Grid.RowDefinitions>
+                                <ScrollViewer Grid.Row="0" Grid.Column="0" HorizontalScrollBarVisibility="Auto"
+                                              VerticalScrollBarVisibility="Disabled">
+                                    <ScrollViewer.Resources>
+                                        <Style TargetType="ScrollBar" BasedOn="{StaticResource {x:Type ScrollBar}}">
+                                            <Style.Triggers>
+                                                <Trigger Property="Orientation" Value="Horizontal">
+                                                    <Setter Property="Height" Value="15" />
+                                                </Trigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </ScrollViewer.Resources>
+                                    <TabPanel x:Name="headerPanel" Background="Transparent" IsItemsHost="true"
+                                              Margin="2,2,0,0" KeyboardNavigation.TabIndex="1" Panel.ZIndex="1" />
+                                </ScrollViewer>
+                                <Border x:Name="contentPanel" BorderBrush="{TemplateBinding BorderBrush}"
+                                        BorderThickness="1,1,1,1" Background="{TemplateBinding Background}"
+                                        Grid.Column="0" KeyboardNavigation.DirectionalNavigation="Contained"
+                                        Grid.Row="1" KeyboardNavigation.TabIndex="2"
+                                        KeyboardNavigation.TabNavigation="Local">
+                                    <ContentPresenter x:Name="PART_SelectedContentHost" ContentSource="SelectedContent"
+                                                      Margin="{TemplateBinding Padding}"
+                                                      SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
+                                </Border>
+                            </Grid>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="TabStripPlacement" Value="Bottom">
+                                    <Setter Property="Grid.Row" TargetName="headerPanel" Value="1" />
+                                    <Setter Property="Grid.Row" TargetName="contentPanel" Value="0" />
+                                    <Setter Property="Height" TargetName="RowDefinition0" Value="*" />
+                                    <Setter Property="Height" TargetName="RowDefinition1" Value="Auto" />
+                                    <Setter Property="Margin" TargetName="headerPanel" Value="2,0,2,2" />
+                                </Trigger>
+                                <Trigger Property="TabStripPlacement" Value="Left">
+                                    <Setter Property="Grid.Row" TargetName="headerPanel" Value="0" />
+                                    <Setter Property="Grid.Row" TargetName="contentPanel" Value="0" />
+                                    <Setter Property="Grid.Column" TargetName="headerPanel" Value="0" />
+                                    <Setter Property="Grid.Column" TargetName="contentPanel" Value="1" />
+                                    <Setter Property="Width" TargetName="ColumnDefinition0" Value="Auto" />
+                                    <Setter Property="Width" TargetName="ColumnDefinition1" Value="*" />
+                                    <Setter Property="Height" TargetName="RowDefinition0" Value="*" />
+                                    <Setter Property="Height" TargetName="RowDefinition1" Value="0" />
+                                    <Setter Property="Margin" TargetName="headerPanel" Value="2,2,0,2" />
+                                </Trigger>
+                                <Trigger Property="TabStripPlacement" Value="Right">
+                                    <Setter Property="Grid.Row" TargetName="headerPanel" Value="0" />
+                                    <Setter Property="Grid.Row" TargetName="contentPanel" Value="0" />
+                                    <Setter Property="Grid.Column" TargetName="headerPanel" Value="1" />
+                                    <Setter Property="Grid.Column" TargetName="contentPanel" Value="0" />
+                                    <Setter Property="Width" TargetName="ColumnDefinition0" Value="*" />
+                                    <Setter Property="Width" TargetName="ColumnDefinition1" Value="Auto" />
+                                    <Setter Property="Height" TargetName="RowDefinition0" Value="*" />
+                                    <Setter Property="Height" TargetName="RowDefinition1" Value="0" />
+                                    <Setter Property="Margin" TargetName="headerPanel" Value="0,2,2,2" />
+                                </Trigger>
+                                <Trigger Property="IsEnabled" Value="false">
+                                    <Setter Property="TextElement.Foreground" TargetName="templateRoot"
+                                            Value="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}" />
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+            <Style x:Key="TabControlStyle2" TargetType="{x:Type TabControl}">
+                <Setter Property="Padding" Value="0" />
+                <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                <Setter Property="VerticalContentAlignment" Value="Stretch" />
+                <Setter Property="HorizontalAlignment" Value="Stretch" />
+                <Setter Property="VerticalAlignment" Value="Stretch" />
+                <Setter Property="TabStripPlacement" Value="Bottom" />
+                <Setter Property="BorderThickness" Value="0" />
+                <Setter Property="Background" Value="Transparent" />
+                <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}" />
+
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="{x:Type TabControl}">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="40" />
+                                    <RowDefinition Height="*" />
+                                </Grid.RowDefinitions>
+
+                                <Border
+                                    Grid.Row="0">
+                                    <domain:UniformTabPanel x:Name="HeaderPanel" />
+                                </Border>
+
+                                <Border
+                                    Grid.Row="1"
+                                    x:Name="Border"
+                                    BorderThickness="{TemplateBinding BorderThickness}"
+                                    Background="{TemplateBinding Background}"
+                                    BorderBrush="{TemplateBinding BorderBrush}">
+                                    <ContentPresenter x:Name="PART_SelectedContentHost" ContentSource="SelectedContent" />
+                                </Border>
+                               
+                            </Grid>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+            <Style x:Key="TabItemStyle1" TargetType="{x:Type TabItem}" BasedOn="{StaticResource {x:Type TabItem}}">
+
+                <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                <Setter Property="VerticalContentAlignment" Value="Stretch" />
+                <Setter Property="Padding" Value="6,2,4,8" />
+
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="TabItem">
+
+                            <Border
+                                x:Name="Panel"
+                                Width="Auto"
+                                Height="Auto"
+                                Padding="0 0 5 0"
+                                Margin="0 0 0 0"
+                                BorderBrush="Transparent"
+                                BorderThickness="0">
+                                <Border
+                                    x:Name="Border"
+                                    MinWidth="150"
+                                    Width="Auto"
+                                    Height="40"
+                                    Background="{DynamicResource UI.OuterPanel}"
+                                    BorderBrush="LightSteelBlue"
+                                    BorderThickness="0"
+                                    CornerRadius="6,6,0,0"
+                                    Cursor="Hand"
+                                    VerticalAlignment="Center">
+                                    <ContentPresenter
+                                        x:Name="ContentSite"
+                                        VerticalAlignment="Center"
+                                        HorizontalAlignment="Center"
+                                        ContentSource="Header"
+                                        Margin="8,3,8,3"
+                                        Width="Auto"
+                                        Height="Auto" />
+                                </Border>
+                            </Border>
+
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsSelected" Value="True">
+                                    <Setter TargetName="Border" Property="Background"
+                                            Value="{DynamicResource UI.OuterPanelHighlight}" />
+                                </Trigger>
+
+                                <Trigger Property="IsSelected" Value="False">
+                                    <Setter TargetName="Border" Property="Background"
+                                            Value="{DynamicResource UI.OuterPanel}" />
+                                </Trigger>
+
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+            <Style x:Key="TabItemStyle2" TargetType="{x:Type TabItem}" BasedOn="{StaticResource {x:Type TabItem}}">
+
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="TabItem">
+
+                            <Border
+                                x:Name="Panel"
+                                Height="32"
+                                Padding="0 0 6 0"
+                                Margin="0 0 0 0"
+                                CornerRadius="7,7,0,0"
+                                BorderBrush="Transparent"
+                                VerticalAlignment="Center"
+                                BorderThickness="0">
+                                <Border
+                                    x:Name="Border"
+                                    Height="32"
+                                    Background="{DynamicResource UI.OuterPanel}"
+                                    BorderBrush="LightSteelBlue"
+                                    BorderThickness="0"
+                                    Padding="0 0 6 0"
+                                    CornerRadius="7,7,0,0"
+                                    Cursor="Hand"
+                                    VerticalAlignment="Center">
+                                    <ContentPresenter
+                                        x:Name="ContentSite"
+                                        VerticalAlignment="Center"
+                                        HorizontalAlignment="Center"
+                                        ContentSource="Header"
+                                        Width="Auto"
+                                        Height="Auto" />
+                                </Border>
+                            </Border>
+
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsSelected" Value="True">
+                                    <Setter TargetName="Border" Property="Background"
+                                            Value="{DynamicResource UI.OuterPanelHighlight}" />
+                                </Trigger>
+
+                                <Trigger Property="IsSelected" Value="False">
+                                    <Setter TargetName="Border" Property="Background"
+                                            Value="{DynamicResource UI.OuterPanel}" />
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+            <Style x:Key="TabControlSplitterStyle" TargetType="{x:Type TabControl}">
+                <Setter Property="SnapsToDevicePixels" Value="True" />
+                <Setter Property="TabStripPlacement" Value="Bottom" />
+
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="{x:Type TabControl}">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="*" />
+                                </Grid.RowDefinitions>
+
+                                <Border>
+                                    <domain:UniformTabPanel x:Name="HeaderPanel" />
+                                </Border>
+
+                                <Border x:Name="Border" Grid.Row="1"
+                                        BorderThickness="{TemplateBinding BorderThickness}"
+                                        Background="Transparent"
+                                        BorderBrush="{TemplateBinding BorderBrush}">
+                                    <ContentPresenter x:Name="PART_SelectedContentHost" ContentSource="SelectedContent" />
+                                </Border>
+                            </Grid>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+            <domain:NumericToBoolConverter x:Key="NumericToBoolConverter" />
+            <BooleanToVisibilityConverter x:Key="BoolToVisibilityConverter" />
+            <domain:DecimalToNumericVolumeConverter x:Key="DecimalToNumericVolumeConverter" />
+            <domain:PositionToValueConverter x:Key="PosToValueConverter" />
+            <resourceFiles:BitmapToImageSourceConverter x:Key="BitmapToImageSourceConverter" />
+            <domain:MultiValueConverter x:Key="MultiValueConverter" />
+
+            <DataTemplate DataType="{x:Type finance1:FinanceViewModel}">
+                <finance:Finance />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type finance1:FinanceCountrySelectionViewModel}">
+                <finance:FinanceCountrySelection />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type vm:SearchViewModel}">
+                <view:Search />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type vm:SettingsViewModel}">
+                <view:Settings />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type vm:PreLoadViewModel}">
+                <view:PreLoad />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type vm:PreferencesViewModel}">
+                <view:Preferences />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type vm:ConfigurablesViewModel}">
+                <view:Configurables />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type vm:MediaSyncViewModel}">
+                <view:MediaSync />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type vm:PreviewViewModel}">
+                <view:Preview />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type vm:LoginViewModel}">
+                <view:Login />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type vm:HomeViewModel}">
+                <view:Home />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type vm:ApplicationsViewModel}">
+                <view:Applications />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type vm:SharedItemsViewModel}">
+                <view:SharedItems />
+            </DataTemplate>
+        </ResourceDictionary>
+    </Application.Resources>
+</Application>
